@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log File Viewer</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        pre {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            overflow: auto;
+            border: 1px solid #ddd;
+        }
+    </style>
+    <script>
+        setInterval(function () {
+            location.reload();
+        }, 2000);
+    </script>
+</head>
+
+<body>
+    <h1>Log File Content</h1>
+    <h4>auto refreshing..</h4>
+    <pre>
+        {{ logs | safe }}
+    </pre>
+</body>
+
+</html>

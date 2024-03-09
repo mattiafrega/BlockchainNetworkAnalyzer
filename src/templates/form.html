@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockchainNetworkAnalyzer - Start Analysis</title>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #downloadOnly {
+            margin-top: 0px;
+            width: 5%;
+        }
+
+        input[type="submit"] {
+            background-color: #0d6efd;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+
+        img {
+            width: 50px;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="formContainer">
+        <h3>BlockchainNetworkAnalyzer - Start Analysis</h3>
+        <form action="/data" method="POST" onsubmit="return valideTime()">
+            <p>Blockchain 1 <input type="text" name="Blockchain1" value="ETH" readonly="readonly" /></p>
+            <p>Blockchain 2 <input type="text" name="Blockchain2" value="MATIC" readonly="readonly" /></p>
+            <p> Start time <input type="datetime-local" name="StartTime" value="2022-12-31T00:01"></p>
+            <p> End time <input type="datetime-local" name="EndTime" value="2022-12-31T00:05"></p>
+            <p>CPU Cores <input type="text" name="Cores" value="4" /></p>
+            <label> Download Only </label>
+            <input id="downloadOnly" type="checkbox" name="download">
+            <label> Format </label>
+            <select name="Format">
+                <option value="gexf">gexf</option>
+                <option value="net">pajek</option>
+                <option value="gml">gml</option>
+            </select>
+            <p><input type="submit" value="Submit" /></p>
+        </form>
+    </div>
+
+    <div class="container" id="stepsContainer">
+        <h2>Process Steps:</h2>
+        <table id="stepsTable">
+            <tr>
+                <th>Steps</th>
+            </tr>
+        </table>
+    </div>
+
+    <form action="/logs" method="GET" target="_blank">
+        <div class="container">
+            <p><input type="submit" value="View Logs" /></p>
+        </div>
+    </form>
+
+    <script>
+        function valideTime() {
+            var start = document.getElementsByName("StartTime")[0].value;
+            var end = document.getElementsByName("EndTime")[0].value;
+            var checkbox = document.getElementById('downloadOnly');
+            //consider only time part
+            start = start.split("T")[1];
+            end = end.split("T")[1];
+            start = new Date("1970-01-01T" + start);
+            end = new Date("1970-01-01T" + end);
+            var diff = Math.abs(end - start) / 60000;
+            if (start >= end) {
+                alert("End time should be greater than start time");
+                return false;
+            }
+            if (diff > 30) {
+                alert('The selected time range is greater than 30 minutes. The average shortest path metric not calculated.');
+            }
+            return true;
+        }
+
+        function readFile() {
+            fetch('http://localhost:5000/read')
+                .then(response => response.json())
+                .then(data => {
+                    const steps = data.content.split('\n');
+                    const table = document.getElementById('stepsTable');
+
+                    while (table.rows.length > 1) {
+                        table.deleteRow(1);
+                    }
+
+                    for (const step of steps) {
+                        const row = table.insertRow();
+                        const cell = row.insertCell();
+                        cell.textContent = step;
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        setInterval(readFile, 5000);
+    </script>
+</body>
+
+</html>

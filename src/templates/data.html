@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Digraph Comparison</title>
+    <style>
+        td,
+        th {
+            padding: 0 20px;
+            border-left: 1px solid #000;
+        }
+
+        tr {
+            border-bottom: 1px solid #000;
+        }
+
+        th:first-child,
+        td:first-child {
+            border-left: none;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function saveJSON() {
+            fetch('/getJSON')
+                .then(response => response.json())
+                .then(data => {
+                    var a = document.createElement("a");
+                    var file = new Blob([JSON.stringify(data)], { type: 'application/json' });
+                    a.href = URL.createObjectURL(file);
+                    a.download = 'data.json';
+                    a.click();
+                    a.remove();
+
+                })
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="mb-4">Starting Input:</h3>
+                <div class="d-flex flex-wrap">
+                    {% for key, value in form_data.items() %}
+                    <div class="mr-4 mb-4">
+                        <h4>{{ key }}</h4>
+                        <p>{{ value }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                <h3> <a href='/start'> Go back to the form </a> </h3>
+                <button class="btn btn-primary p-1 ml-auto mr-2" onclick="window.print()">Save as PDF</button>
+                <button class="btn btn-primary p-1 ml-auto mt-2" onclick="saveJSON()">Save as JSON</button>
+            </div>
+        </div>
+    </div>
+    <br>
+    <table class="table w-100 mx-auto w-auto">
+        <thead>
+            <tr>
+                <th>Metric</th>
+                {% for digraph in results %}
+                <th>{{ digraph.name }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for metric in results[0].measures.keys() %}
+            <tr>
+                <td> <b>{{ metric }} </b> </td>
+                {% for digraph in results %}
+                <td>
+                    {% if "degree_distribution" in metric %}
+                    <canvas id="{{ digraph.name }}_{{ metric }}"></canvas>
+                    <script>
+                        function createChartAndChangeScaleFunction(digraphName, metric) {
+                            var data = "{{ digraph.measures[metric]}}"
+                            //replace the value &#34; with double quotes
+                            data = data.replace(/&#34;/g, '"')
+                            data = JSON.parse(data)
+                            label = Object.keys(data)
+                            values = Object.values(data)
+                            var ctx = document.getElementById(digraphName + '_' + metric).getContext('2d');
+                            var chart = new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: label,
+                                    datasets: [{
+                                        label: digraphName + ' ' + metric,
+                                        data: values,
+                                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                        borderColor: 'rgba(75, 192, 192, 1)',
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true
+                                        }
+                                    }
+                                }
+                            });
+
+                            // Create a new changeScale function for this chart
+                            var changeScale = function () {
+                                var currentScaleTypeX = chart.options.scales.x.type;
+                                var currentScaleTypeY = chart.options.scales.y.type;
+
+                                chart.options.scales = {
+                                    x: {
+                                        type: currentScaleTypeX === 'logarithmic' ? 'linear' : 'logarithmic',
+                                    },
+                                    y: {
+                                        type: currentScaleTypeY === 'logarithmic' ? 'linear' : 'logarithmic',
+                                    }
+                                };
+                                chart.update();
+                            }
+                            document.getElementById('{{ digraph.name }}_{{ metric }}').onclick = changeScale;
+                        }
+
+                        createChartAndChangeScaleFunction('{{ digraph.name }}', '{{ metric }}');
+                    </script>
+                    {% else %}
+                    {{ digraph.measures[metric] }}
+                    {% endif %}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>
