@@ -208,4 +208,4 @@ file_handler = TimedRotatingFileHandler('app.log', when="midnight", interval=1, 
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 file_handler.setFormatter(formatter)
 app.logger.addHandler(file_handler)
-app.run(host='127.0.0.1', port=5000)
+app.run(host='0.0.0.0', port=5000)

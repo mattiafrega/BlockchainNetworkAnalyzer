@@ -64,7 +64,7 @@ and go to localhost:5000/start
 ### Docker
 If you're into Docker you may want to just launch
 ```
-docker run mattiafrega/blockchainnetworkanalyzer:latest
+docker run -p 5000:5000 mattiafrega/blockchainnetworkanalyzer:latest
 ```
 An go to the host container at :5000/start
 
