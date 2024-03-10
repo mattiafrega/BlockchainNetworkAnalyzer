@@ -46,7 +46,7 @@ For the main component:
 - degree distribution OUT
 
 ## Get started
-### Manual
+### Manual [RECOMMENDED]
 To get started:
 - clone the repository,
 - be sure to have installed all the packages included in the requirements.txt file,
